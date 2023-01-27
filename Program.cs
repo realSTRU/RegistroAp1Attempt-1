@@ -1,15 +1,22 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using RegistroAP.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+var ConStr = builder.Configuration.GetConnectionString("ConStr");
+
 // Add services to the container.
+builder.Services.AddScoped<OcupacionesBLL>();
 builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
+IServerSideBlazorBuilder serverSideBlazorBuilder = builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddDbContext<Contexto>(options => options.UseSqlite(ConStr));
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

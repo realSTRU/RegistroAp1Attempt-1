@@ -1,65 +1,168 @@
 ﻿@page "/Registro"
+@page "/Registro/{OcupacionId:int}"
+
+
+
+@inject OcupacionesBLL ocupacionesBll
+
+
 
 
 <PageTitle>Register</PageTitle>
 
 <body style="background-color:#706993;">
-    <EditForm model="0">
+    <EditForm model="Ocupaciones" >
+        <DataAnnotationsValidator/>
 
    
 
-    <div class="container" style="background-color:#D8E1E9">
-        <div>
+        <div class="container">
+            <div>
 
-            <div class="card-header d-flex justify-content-center">
-                <h3><b>Registro ocupaciones</b></h3>
-            </div>
-
-            <div class="form-group">
-                <label for="idOP"><b>OcupaciónID:</b></label>
-                <div class="input-group col-5 mb-5">
-                    <input type="text" id="idOP" class="form-control">
-                    <button class="btn btn-primary " type="button"><b><img src="https://cdn-icons-png.flaticon.com/512/149/149852.png" style="height:18px;"> Buscar</b></button>
-
+                <div class="card-header d-flex justify-content-center">
+                    <h3 style="color:white" ><b>Registro ocupaciones.</b></h3>
                 </div>
 
-                <label for="Desk"><b>Descripción:</b></label>
-                <div>
-                    <input type="text" id="Desk" class="form-control">
-                </div>
-
-                <label for="Desk"><b>Salario:</b></label>
-                <div>
-                    <input type="text" id="Desk" class="form-control">
-                </div>
-
-
-            </div>
-
-            <div class="card-footer d-flex justify-content-center">
-                <div class="row">
-                    <div class="btn-group">
-                        <button class="btn btn-primary" type="button"><img src="https://cdn-icons-png.flaticon.com/512/1155/1155623.png" style="height:18px;"><b> Nuevo</b></button>
-                        <button class="btn btn-success" type="button"><img src="https://cdn-icons-png.flaticon.com/512/376/376218.png" style="height:18px;"><b>  Guardar</b></button>
-                        <button class="btn btn-danger" type="button"><img src="https://cdn-icons-png.flaticon.com/512/542/542724.png" style="height:18px;"><b> Eliminar</b></button>
+                <div class="form-group">
+                    <label for="idOP" style="color:white"><b>OcupaciónID:</b></label>
+                    <div class="input-group col-5 mb-5">
+                        <input @bind-value="Ocupacion.OcupacionId" type="text" id="idOP" class="form-control">
+                        <button class="btn btn-primary " type="button" @onclick ="Buscar"><b><img src="https://cdn-icons-png.flaticon.com/512/149/149852.png" style="height:18px;"> Buscar</b></button>
 
                     </div>
+
+
+                    <label for="Desk" style="color:white"><b>Descripción:</b></label>
+                    <div>
+                        <input @bind-value="Ocupacion.Descripcion" type="text" id="Desk" class="form-control">
+                        
+                    </div>
+
+                    <label for="Desk" style="color:white"><b>Salario:</b></label>
+                    <div>
+                        <input @bind-value="Ocupacion.Sueldo" type="text" id="Desk" class="form-control">
+                        
+                    </div>
+
+
+                </div>
+
+                <div class="card-footer d-flex justify-content-center">
+                    <div class="row">
+                        <div class="btn-group">
+                            <button class="btn btn-primary" type="button" @onclick="Nuevo"><img src="https://cdn-icons-png.flaticon.com/512/1155/1155623.png" style="height:18px;"><b> Nuevo</b></button>
+                            <button class="btn btn-success" type="button" @onclick="Guardar"><img src="https://cdn-icons-png.flaticon.com/512/376/376218.png" style="height:18px;"><b>  Guardar</b></button>
+                            <button class="btn btn-danger" type="button" @onclick="eliminar"><img src="https://cdn-icons-png.flaticon.com/512/542/542724.png" style="height:18px;"><b> Eliminar</b></button>
+
+                        </div>
+                    </div>
+
                 </div>
 
             </div>
-
         </div>
-    </div>
 
 
-</EditForm>
-
+    </EditForm>
 </body>
 
 
 
 
 
+
 @code {
+
+    [Parameter]
+
+    public int OcupacionId {get; set;}
+
+    public Ocupaciones Ocupacion {get; set;} = new Ocupaciones();
+
+    protected override void OnInitialized(){
+
+        if(OcupacionId >0){
+            this.Ocupacion.OcupacionId = OcupacionId;
+            this.Buscar();
+        }
+    }
+
+    private void Buscar()
+    {
+        var ocupacionEncontrada = ocupacionesBll.Buscar(Ocupacion.OcupacionId);
+        if(ocupacionEncontrada != null)
+        {
+            Console.WriteLine($"Se encontro una ocupacion con el ID{this.Ocupacion.OcupacionId}");
+            this.Ocupacion = ocupacionEncontrada;
+            
+        }
+        else
+        {
+            Nuevo();
+            Console.WriteLine("Id no existente");
+        }
+    }
+
+    public void Nuevo(){
+        this.Ocupacion = new Ocupaciones();
+    }
+
+
+    public bool Validar(){
+        return this.Ocupacion.Descripcion != "" && this.Ocupacion.Sueldo > 0;
+    }
+
+    public void Guardar(){
+
+       
+        if(Validar()){
+
+            ocupacionesBll.Guardar(this.Ocupacion);
+            Console.WriteLine($"Se guardo en el {this.Ocupacion.OcupacionId}");
+            this.Nuevo();
+        }
+        else{
+            Console.WriteLine("Campos no validos o no completados");
+        }
+    }
+    
+
+
+
+    public void eliminar(){
+
+       
+        if(Validar()){
+            bool RES = ocupacionesBll.Eliminar(this.Ocupacion);
+
+            if(RES == false){
+                Console.WriteLine("Eliminado Correctamente");
+                Nuevo();
+            }
+            else{
+               Console.WriteLine("No se borro nada");
+            }
+            
+            
+
+        }
+        else
+        {
+            Nuevo();
+            Console.WriteLine("Id no valido");
+            
+        }
+        
+        
+      
+       
+       
+        
+        
+        
+    }
+
+
+
 
 }

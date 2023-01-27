@@ -1,0 +1,48 @@
+﻿@page "/C_Ocupaciones"
+
+
+@inject OcupacionesBLL ocupaciones
+
+
+<h1>Consulta Ocupaciones.</h1>
+<p><br>Pagina de consultas sobre las ocupaciones registradas en la pagina de registro.</p>
+
+@if(LOcupaciones == null){
+
+    <p><em>Loading........</em></p>
+}
+else
+{
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Descripcion</th>
+                <th>Sueldo($)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var ocupaciones in LOcupaciones){
+                <tr>
+                    <td>@ocupaciones.OcupacionId</td>
+                    <td>@ocupaciones.Descripcion</td>
+                    <td>@ocupaciones.Sueldo</td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+}
+
+
+@code {
+
+    private List<Ocupaciones>? LOcupaciones {get; set;}
+    
+    protected override async Task OnInitializedAsync()
+    {
+        LOcupaciones = ocupaciones.GetList();
+    }
+
+}
